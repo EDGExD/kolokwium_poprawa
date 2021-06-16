@@ -1,6 +1,8 @@
 import edu.iis.mto.testreactor.money.Money;
 import edu.iis.mto.testreactor.offer.Discount;
 import edu.iis.mto.testreactor.offer.DiscountPolicy;
+import edu.iis.mto.testreactor.offer.Offer;
+import edu.iis.mto.testreactor.offer.OfferItem;
 import edu.iis.mto.testreactor.reservation.ClientData;
 import edu.iis.mto.testreactor.reservation.Id;
 import edu.iis.mto.testreactor.reservation.Product;
@@ -8,6 +10,7 @@ import edu.iis.mto.testreactor.reservation.ProductType;
 import edu.iis.mto.testreactor.reservation.Reservation;
 import edu.iis.mto.testreactor.reservation.Reservation.ReservationStatus;
 import java.util.Date;
+import java.util.List;
 import static org.hamcrest.Matchers.equalTo;
 
 import org.hamcrest.MatcherAssert;
@@ -82,5 +85,23 @@ public class ReservationTest{
         reservation.calculateOffer(discountPolicy);
         
         verify(discountPolicy, times(1)).applyDiscount(product1, 4, money);
+    }
+    
+    @Test
+    void reservation_calculate_test()
+    {
+        reservation.add(product1, 3);
+        reservation.add(product2, 1);
+        Mockito.when(discountPolicy.applyDiscount(product1, 3, money)).thenReturn(discount);
+        Mockito.when(discountPolicy.applyDiscount(product2, 1, money)).thenReturn(discount);
+        Offer offer = reservation.calculateOffer(discountPolicy);
+        List<OfferItem> items = offer.getAvailabeItems();
+        
+        OfferItem item = items.get(0);
+        
+        MatcherAssert.assertThat(item.getQuantity(), equalTo(3));
+        
+        item = items.get(1);
+        MatcherAssert.assertThat(item.getQuantity(), equalTo(1));
     }
 }
